@@ -1,0 +1,4 @@
+experiment_name,input_bam,num_reads,max_mem,max_cpu,time
+sam_basic_first_10k_reads,bam_files/SRR2064446.sorted.bam,7066868,10945976,100.907082,104.50763487815857
+experiment_name,input_bam,num_reads,max_mem,max_cpu,time
+sam_basic_full_file,bam_files/SRR2064446.sorted.bam,7066868,10945872,99.943712,103.38837122917175
