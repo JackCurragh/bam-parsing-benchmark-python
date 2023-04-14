@@ -20,7 +20,6 @@ def parse_bam(bam_file: str) -> list:
 
     with HTSeq.BAM_Reader(bam_file) as bam_reader:
         for alignment in bam_reader:
-            inspect(alignment)
             read_dict[alignment.read.name] = {
                 'read_name': alignment.read.name,
                 'read_length': len(alignment.read),

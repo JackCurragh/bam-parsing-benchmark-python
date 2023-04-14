@@ -17,19 +17,27 @@ def parse_bam(bam_file: str) -> list:
     '''
 
     data = []
+                # 'read_name': alignment.read.name,
+                # 'read_length': len(alignment.read),
+                # 'reference_name': alignment.iv.chrom if alignment.iv is not None else "",
+                # 'reference_start': alignment.iv.start if alignment.iv is not None else -1,
+                # 'reference_end': alignment.iv.end if alignment.iv is not None else -1,
+                # 'sequence': alignment.read.seq,
+                # 'sequence_qualities': alignment.read.qual,
+                # 'tags': alignment.optional_fields
 
     with HTSeq.BAM_Reader(bam_file) as bam_reader:
 
         for read in bam_reader:
             data.append((
-                read.query_name,
-                read.query_length if read.query_length is not None else 0,
-                read.reference_name if read.reference_name is not None else "",
-                read.reference_start if read.reference_start is not None else -1,
-                read.reference_end if read.reference_end is not None else -1,
-                read.query_sequence if read.query_sequence is not None else "",
-                read.query_qualities if read.query_qualities is not None else [],
-                read.tags if read.tags is not None else []
+                read.read.name,
+                len(read.read),
+                read.iv.chrom if read.iv is not None else "",
+                read.iv.start if read.iv is not None else -1,
+                read.iv.end if read.iv is not None else -1,
+                read.read.seq,
+                read.read.qual,
+                read.optional_fields
             ))
 
     dtype = [
