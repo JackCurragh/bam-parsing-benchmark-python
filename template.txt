@@ -1,0 +1,14 @@
+{% set system_info = results.get('system_info', {}) %}
+
+=== System Info ===
+CPU: {{ system_info.get('cpu', '') }}
+RAM: {{ system_info.get('ram', '') }}
+OS: {{ system_info.get('os', '') }}
+
+{% for test_name, test_result in results.get('test_results', {}).items() %}
+=== {{ test_name }} ===
+{% for metric_name, metric_value in test_result.get('metrics', {}).items() %}
+{{ metric_name|title }}: {{ metric_value }}
+{% endfor %}
+Raw Data: {{ test_result.get('raw_data', '') }}
+{% endfor %}

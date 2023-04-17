@@ -9,6 +9,8 @@ import os
 import argparse
 import pandas as pd
 
+from rich import print
+
 import HTSeq
 
 def parse_bam(bam_file: str) -> list:
@@ -20,6 +22,10 @@ def parse_bam(bam_file: str) -> list:
 
     with HTSeq.BAM_Reader(bam_file) as bam_reader:
         for alignment in bam_reader:
+            if '_x' in alignment.read.name:
+                count = int(alignment.read.name.split('_x')[-1])
+            else:
+                count = 1
             data.append({
                 'read_name': alignment.read.name,
                 'read_length': len(alignment.read),
@@ -28,7 +34,8 @@ def parse_bam(bam_file: str) -> list:
                 'reference_end': alignment.iv.end if alignment.iv is not None else -1,
                 'sequence': alignment.read.seq,
                 'sequence_qualities': alignment.read.qual,
-                'tags': alignment.optional_fields
+                'tags': alignment.optional_fields,
+                'count': count,
             })
 
     return pd.DataFrame(data)
@@ -49,7 +56,8 @@ def main(args):
     print("Execution time:", end_time - start_time)
 
     with open('results.csv', 'a') as f:
-        f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
+        if args.header:
+            f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
         f.write(f"{os.path.basename(__file__).strip('.py')},{args.bam_file},{len(read_dict)},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_utime},"
@@ -60,5 +68,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--bam_file', type=str, default='data/NA12878.bam',
                         help='The BAM file to read')
+    parser.add_argument('--header', action='store_true', default=False, help='Print the header')
     args = parser.parse_args()
     main(args)

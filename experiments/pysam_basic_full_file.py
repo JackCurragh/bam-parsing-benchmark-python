@@ -8,6 +8,8 @@ import os
 
 import pysam
 import argparse
+from rich import print
+
 
 def parse_bam(bam_file: str) -> dict:
     '''

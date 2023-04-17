@@ -1,3 +1,6 @@
+
+
+
 '''
 Experiment where we use pysam to read a bam file and print out the
 number of reads in the file.
@@ -6,36 +9,46 @@ import resource
 import time
 import os
 
-import pysam
 import argparse
+import pandas as pd
+import subprocess
+
 from rich import print
 
+import HTSeq
 
-def parse_bam(bam_file: str) -> dict:
+def parse_bam(bam_file: str) -> list:
     '''
-    This function will parse a BAM file and return a dictionary of the reads.
+    This function will convert a BAM file to SAM format, read the output in chunks,
+    and then parse the SAM data using pure Python.
     '''
-    read_dict = {}
-    # Open the BAM file
-    with pysam.AlignmentFile(bam_file, 'rb') as bam_file:
-        for read in bam_file:
-            if '_x' in read.query_name:
-                count = int(read.query_name.split('_x')[-1])
-            else:
-                count = 1
-            read_dict[read.query_name] = {
-                        'read_name': read.query_name,
-                        'read_length': read.query_length,
-                        'reference_name': read.reference_name,
-                        'reference_start': read.reference_start,
-                        'reference_end': read.reference_end,
-                        'sequence': read.query_sequence,
-                        'sequence_qualities': read.query_qualities,
-                        'tags': read.tags,
-                        'count': count,
-                    }
 
-    return read_dict
+    # Convert the BAM file to SAM format and read the output in chunks
+    cmd = f'samtools view {bam_file}'
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, text=True)
+
+    read_list = []
+    for line in iter(process.stdout.readline, ''):
+        fields = line.strip().split('\t')
+
+        if line.startswith('@'):
+            continue
+        if '_x' in fields[0]:
+            count = int(fields[0].split('_x')[-1])
+        else:
+            count = 1
+        read_list.append({
+            'read_name': fields[0],
+            'read_length': len(fields[9]),
+            'reference_name': fields[2],
+            'reference_start': int(fields[3]) - 1,
+            'sequence': fields[9],
+            'sequence_qualities': fields[10],
+            'tags': fields[11:]
+        })
+
+    process.communicate()
+    return read_list
 
 
 def main(args):
@@ -60,8 +73,7 @@ def main(args):
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_utime},"
                 f"{end_time - start_time}\n")
-    print(len(read_dict))
-
+    output_name = args.bam_file.split('/')[-1].split('.')[0]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

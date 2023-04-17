@@ -7,6 +7,8 @@ import time
 import os
 
 import argparse
+from rich import print
+
 
 import HTSeq
 import numpy as np
@@ -17,18 +19,14 @@ def parse_bam(bam_file: str) -> list:
     '''
 
     data = []
-                # 'read_name': alignment.read.name,
-                # 'read_length': len(alignment.read),
-                # 'reference_name': alignment.iv.chrom if alignment.iv is not None else "",
-                # 'reference_start': alignment.iv.start if alignment.iv is not None else -1,
-                # 'reference_end': alignment.iv.end if alignment.iv is not None else -1,
-                # 'sequence': alignment.read.seq,
-                # 'sequence_qualities': alignment.read.qual,
-                # 'tags': alignment.optional_fields
 
     with HTSeq.BAM_Reader(bam_file) as bam_reader:
 
         for read in bam_reader:
+            if '_x' in read.read.name:
+                count = int(read.read.name.split('_x')[-1])
+            else:
+                count = 1
             data.append((
                 read.read.name,
                 len(read.read),
@@ -37,7 +35,8 @@ def parse_bam(bam_file: str) -> list:
                 read.iv.end if read.iv is not None else -1,
                 read.read.seq,
                 read.read.qual,
-                read.optional_fields
+                read.optional_fields,
+                count
             ))
 
     dtype = [
@@ -48,7 +47,8 @@ def parse_bam(bam_file: str) -> list:
         ('reference_end', np.int32),
         ('sequence', 'U50'),
         ('sequence_qualities', 'O'),
-        ('tags', 'O')
+        ('tags', 'O'),
+        ('count', np.uint32)
     ]
 
     return np.array(data, dtype=dtype)
@@ -70,7 +70,8 @@ def main(args):
     print("Execution time:", end_time - start_time)
 
     with open('results.csv', 'a') as f:
-        f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
+        if args.header:
+            f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
         f.write(f"{os.path.basename(__file__).strip('.py')},{args.bam_file},{len(read_dict)},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_utime},"
@@ -81,5 +82,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--bam_file', type=str, default='data/NA12878.bam',
                         help='The BAM file to read')
+    parser.add_argument('--header', action='store_true', default=False, help='Print the header')
     args = parser.parse_args()
     main(args)

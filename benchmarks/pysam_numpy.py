@@ -8,6 +8,8 @@ import os
 
 import pysam
 import argparse
+from rich import print
+
 
 import numpy as np
 
@@ -24,7 +26,8 @@ def parse_bam(bam_file: str) -> np.ndarray:
         ('reference_end', np.int32),
         ('sequence', 'U50'),
         ('sequence_qualities', 'O'),
-        ('tags', 'O')
+        ('tags', 'O'),
+        ('count', np.uint32)
     ]
 
     data = []
@@ -32,6 +35,10 @@ def parse_bam(bam_file: str) -> np.ndarray:
     # Open the BAM file
     with pysam.AlignmentFile(bam_file, 'rb') as bam_file:
         for read in bam_file:
+            if '_x' in read.query_name:
+                count = int(read.query_name.split('_x')[-1])
+            else:
+                count = 1
             data.append((
                 read.query_name,
                 read.query_length if read.query_length is not None else 0,
@@ -40,7 +47,8 @@ def parse_bam(bam_file: str) -> np.ndarray:
                 read.reference_end if read.reference_end is not None else -1,
                 read.query_sequence if read.query_sequence is not None else "",
                 read.query_qualities if read.query_qualities is not None else [],
-                read.tags if read.tags is not None else []
+                read.tags if read.tags is not None else [],
+                count
             ))
 
     return np.array(data, dtype=dtype)
@@ -61,7 +69,8 @@ def main(args):
     print("Execution time:", end_time - start_time)
 
     with open('results.csv', 'a') as f:
-        f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
+        if args.header:
+            f.write('experiment_name,input_bam,num_reads,max_mem,max_cpu,time\n')
         f.write(f"{os.path.basename(__file__).strip('.py')},{args.bam_file},{len(read_dict)},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},"
                 f"{resource.getrusage(resource.RUSAGE_SELF).ru_utime},"
@@ -72,5 +81,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--bam_file', type=str, default='data/NA12878.bam',
                         help='The BAM file to read')
+    parser.add_argument('--header', action='store_true', default=False, help='Print the header')
     args = parser.parse_args()
     main(args)
