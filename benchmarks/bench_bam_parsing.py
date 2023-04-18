@@ -41,12 +41,6 @@ def benchmark_samtools_sam_pure_python():
 def benchmark_samtools_sam_pure_python_df():
     result = parse_bam_samtools_sam_pure_python_df(bam_file)
 
-def benchmark_samtools_sam_pure_python_df_w_duplicate_handling():
-    result = parse_bam_samtools_sam_pure_python_df_w_duplicate_handling(bam_file)
-
-def benchmark_samtools_sam_pure_python_w_duplicate_handling():
-    result = parse_bam_samtools_sam_pure_python_w_duplicate_handling(bam_file)
-
 def benchmark_samtools_sam_pure_python_df_w_duplicate_handling_cython():
     result = parse_bam_samtools_sam_pure_python_df_w_duplicate_handling_cython(bam_file)
 
@@ -81,8 +75,7 @@ __benchmarks__ = [
 
     # Samtools Comparisons
     (benchmark_samtools_sam_pure_python, benchmark_samtools_sam_pure_python_df, "Samtools: Dict vs DataFrame"),
-    (benchmark_samtools_sam_pure_python_w_duplicate_handling, benchmark_samtools_sam_pure_python_df_w_duplicate_handling, "Samtools: Dict vs DataFrame with duplicate handling"),
-
+    (benchmark_samtools_sam_pure_python, benchmark_samtools_sam_pure_python_df_w_duplicate_handling_cython, "Samtools: Dict vs DataFrame w/ Cython"),
     (benchmark_samtools_sam_pure_python, benchmark_samtools_sam_pure_python_df, "Dictionary: Samtools pure vs Samtools pysam"),
 
 

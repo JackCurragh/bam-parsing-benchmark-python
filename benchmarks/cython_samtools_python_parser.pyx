@@ -9,7 +9,7 @@ import subprocess
 from rich import print
 import HTSeq
 
-def parse_bam(str bam_file):
+def parse_bam(bam_file):
     cdef str cmd = f'samtools view {bam_file}'
     cdef process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, text=True)
 
@@ -20,8 +20,8 @@ def parse_bam(str bam_file):
         if line.startswith('@'):
             continue
         fields = line.strip().split('\t')
-        if '_x' in alignment.read.name:
-            count = int(alignment.read.name.split('_x')[-1])
+        if '_x' in fields[0]:
+            count = int(fields[0].split('_x')[-1])
         else:
             count = 1
         read_list.append({
