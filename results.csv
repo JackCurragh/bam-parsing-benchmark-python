@@ -26,3 +26,7 @@ samtools_sam_pure_python_df,bam_files/subsampled_10_percent.bam,2860494,4006452,
 samtools_sam_pure_python,bam_files/subsampled_1_percent.bam,287722,389720,1.345188,1.4901678562164307
 samtools_sam_pure_python,bam_files/subsampled_5_percent.bam,1432598,1682448,6.644559,7.157260417938232
 samtools_sam_pure_python,bam_files/subsampled_10_percent.bam,2860494,3293860,11.988769,12.94963788986206
+oxbow_pandas,bam_files/subsampled_1_percent.bam,287722,529616,2.404257,2.277879476547241
+samtools_sam_pure_python_df,bam_files/subsampled_1_percent.bam,287722,488416,1.919446,1.9821975231170654
+samtools_sam_pure_python_df,bam_files/subsampled_10_percent.bam,2860494,4033728,16.839451,18.323248386383057
+oxbow_pandas,bam_files/subsampled_10_percent.bam,2860494,1739276,9.103374,9.38020133972168
